@@ -7,7 +7,7 @@ Example usage:
     # Context manager approach (automatic monitoring)
     with Phylax(config) as phylax:
         result = my_agent_function(prompt)
-    
+
     # Explicit analysis approach
     phylax = Phylax(config)
     safe_output = phylax.analyze(agent_output, context="Agent response")
@@ -22,14 +22,14 @@ Features:
     - Support for custom input/output extractors
 """
 
-from .core import Phylax, PhylaxViolation
 from .config import PhylaxConfig, Policy
+from .core import Phylax, PhylaxViolation
 from .version import __version__
 
 __all__ = [
     "Phylax",
-    "PhylaxConfig", 
-    "Policy",
+    "PhylaxConfig",
     "PhylaxViolation",
+    "Policy",
     "__version__",
 ]

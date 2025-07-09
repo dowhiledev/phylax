@@ -91,14 +91,14 @@ policies:
     severity: high
     trigger: raise
     scope: [output, analysis, network]
-    
+
   - id: sensitive_keywords
     type: regex
     pattern: "(?i)(password|secret|token|api_key)"
     severity: medium
     trigger: log
     scope: [input, output, analysis]
-    
+
   - id: license_compliance
     type: spdx
     allowed: [MIT, Apache-2.0, BSD-3-Clause]
@@ -135,10 +135,10 @@ def handle_security_violation(policy, sample, context):
         sample=sample[:100],  # Truncate for logging
         context=context
     )
-    
+
     # Send to monitoring dashboard
     dashboard.report_violation(policy, context)
-    
+
     # Notify security team for high-severity violations
     if policy.severity == "high":
         notify_security_team(policy, sample, context)
@@ -195,11 +195,11 @@ phylax = Phylax(
 with phylax:
     # Network requests are monitored
     response = requests.get("https://api.example.com/data")
-    
+
     # File operations are monitored
     with open("sensitive_data.txt", "r") as f:
         content = f.read()
-    
+
     # Function calls are monitored
     result = my_ai_function(content)
 ```
@@ -222,13 +222,13 @@ with Phylax(config) as phylax:
         goal='Research the given topic',
         backstory='Expert researcher with access to various sources'
     )
-    
+
     # Define tasks
     research_task = Task(
         description='Research AI safety best practices',
         agent=researcher
     )
-    
+
     # Run crew with automatic monitoring
     crew = Crew(agents=[researcher], tasks=[research_task])
     result = crew.kickoff()  # All agent interactions monitored

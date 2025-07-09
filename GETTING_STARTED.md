@@ -29,7 +29,7 @@ config = PhylaxConfig(
     policies=[
         Policy(
             id="ssn_detector",
-            type="regex", 
+            type="regex",
             pattern=r"\d{3}-\d{2}-\d{4}",
             severity="high",
             trigger="raise"
@@ -54,8 +54,8 @@ phylax = Phylax(config)
 try:
     # Check input data
     safe_input = phylax.analyze_input("Hello, how are you?")  # ✅ Safe
-    
-    # Check output data  
+
+    # Check output data
     safe_output = phylax.analyze_output("SSN: 123-45-6789")  # ❌ Will raise
 except PhylaxViolation as e:
     print(f"Security violation: {e}")
@@ -73,7 +73,7 @@ policies:
     severity: high
     trigger: raise
     scope: ["output", "analysis"]
-    
+
   - id: sensitive_keywords
     type: regex
     pattern: '(?i)(password|secret|token|key)'
@@ -108,7 +108,7 @@ def handle_violation(policy, sample, context):
 def log_input(data):
     print(f"📥 Input: {data}")
 
-@phylax.on_output  
+@phylax.on_output
 def log_output(data):
     print(f"📤 Output: {data}")
 ```

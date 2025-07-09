@@ -25,6 +25,7 @@ Features:
 from .config import PhylaxConfig, Policy
 from .core import Phylax
 from .exceptions import PhylaxViolation
+from .presets import PresetRegistry, extend_preset, get_preset, list_presets
 from .version import __version__
 
 __all__ = [
@@ -32,5 +33,9 @@ __all__ = [
     "PhylaxConfig",
     "PhylaxViolation",
     "Policy",
+    "PresetRegistry",
     "__version__",
+    "extend_preset",
+    "get_preset",
+    "list_presets",
 ]

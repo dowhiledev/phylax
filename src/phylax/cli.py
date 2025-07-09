@@ -86,6 +86,7 @@ def scan_text(text: str, config_file: Path | None = None) -> None:
         # Use default minimal policies for demonstration
         config = PhylaxConfig(
             version=1,
+            presets=None,
             policies=[
                 Policy(
                     id="pii_ssn",

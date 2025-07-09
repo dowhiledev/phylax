@@ -2,7 +2,13 @@
 
 import logging
 
-from phylax import Phylax, PhylaxConfig, PhylaxViolation, Policy
+from phylax import (
+    Phylax,
+    PhylaxConfig,
+    PhylaxViolation,
+    Policy,
+    list_presets,
+)
 
 # Configure logging to see Phylax output
 logging.basicConfig(level=logging.DEBUG, format="%(levelname)s: %(message)s")
@@ -149,5 +155,36 @@ def main():
     print("\n=== Example completed ===")
 
 
+def demonstrate_presets():
+    """Demonstrate preset usage."""
+    print("\n=== Preset Usage Example ===")
+
+    # Show available presets
+    print(f"Available presets: {list_presets()}")
+
+    # Use HIPAA preset
+    hipaa_config = PhylaxConfig.from_preset("hipaa")
+    print(f"HIPAA preset loaded with {len(hipaa_config.policies)} policies")
+
+    # Use multiple presets
+    multi_config = PhylaxConfig.from_presets(["soc2", "pci_dss"])
+    print(f"SOC2 + PCI DSS presets loaded with {len(multi_config.policies)} policies")
+
+    # Test with preset
+    with Phylax(hipaa_config, monitor_console=False) as phylax:
+
+        @phylax.on_violation
+        def preset_violation_handler(policy, sample, context):
+            print(f"🚨 HIPAA Violation: {policy.id}")
+
+        try:
+            # This should trigger HIPAA violations
+            sensitive_data = "Patient SSN: 123-45-6789"
+            phylax.analyze(sensitive_data, context="Medical record")
+        except PhylaxViolation as e:
+            print(f"🚫 HIPAA violation detected: {e}")
+
+
 if __name__ == "__main__":
     main()
+    demonstrate_presets()

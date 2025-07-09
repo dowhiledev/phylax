@@ -1,0 +1,30 @@
+# Example YAML configuration using presets
+version: 1
+
+# Include predefined presets
+presets:
+  - hipaa      # HIPAA compliance policies
+  - soc2       # SOC 2 compliance policies
+
+# Add custom policies that extend the presets
+policies:
+  - id: custom_employee_id
+    type: regex
+    pattern: "EMP-\\\\d{6}"
+    severity: medium
+    trigger: log
+    scope: [output, analysis]
+    
+  - id: custom_project_code
+    type: regex
+    pattern: "PRJ-[A-Z]{3}-\\\\d{4}"
+    severity: low
+    trigger: log
+    scope: [output, analysis]
+    
+  - id: custom_internal_system
+    type: regex
+    pattern: "SYS-[A-Z]{2}-\\\\d{3}"
+    severity: high
+    trigger: human_review
+    scope: [output, analysis, network]

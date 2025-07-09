@@ -10,6 +10,7 @@
 
 - **Context Manager Approach**: Automatically monitor all activity within a `with Phylax(...):` block
 - **Explicit Analysis**: Use `phylax.analyze()` for targeted compliance checks on specific data
+- **Built-in Presets**: Ready-made compliance presets for HIPAA, SOC 2, PCI DSS, GDPR, and Financial Services
 - **Flexible Configuration**: YAML-based policy configuration supporting regex, SPDX, and custom policies
 - **Multiple Trigger Types**: Choose from raise, log, human_review, or custom violation handling
 - **Comprehensive Monitoring**: Console output, function calls, network requests, and file operations
@@ -77,6 +78,50 @@ with Phylax(config) as phylax:
     # All function calls within this block are automatically monitored
     response = my_ai_agent("Hello world")
     print(f"Response: {response}")
+```
+
+### Using Presets
+
+Phylax provides built-in presets for common compliance standards:
+
+```python
+from phylax import PhylaxConfig, list_presets
+
+# See available presets
+print(list_presets())  # ['hipaa', 'soc2', 'pci_dss', 'gdpr', 'financial']
+
+# Use a single preset
+config = PhylaxConfig.from_preset("hipaa")
+
+# Combine multiple presets
+config = PhylaxConfig.from_presets(["hipaa", "soc2"])
+
+# Extend presets with custom policies
+custom_policies = [
+    Policy(
+        id="custom_employee_id",
+        type="regex",
+        pattern="EMP-\\d{6}",
+        severity="medium",
+        trigger="log"
+    )
+]
+config = PhylaxConfig.from_presets(["hipaa"], custom_policies)
+
+# Use presets in YAML
+yaml_config = """
+version: 1
+presets:
+  - hipaa
+  - soc2
+policies:
+  - id: custom_rule
+    type: regex
+    pattern: "CUSTOM-\\d{6}"
+    severity: medium
+    trigger: log
+"""
+config = PhylaxConfig.from_yaml(yaml_config)
 ```
 
 ### YAML Configuration

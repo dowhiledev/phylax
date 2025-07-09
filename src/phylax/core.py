@@ -17,15 +17,8 @@ if TYPE_CHECKING:
     from pathlib import Path
     import types
 
-try:
-    import httpx
-except ImportError:
-    httpx = None
-
-try:
-    import requests
-except ImportError:
-    requests = None  # type: ignore[assignment]
+import httpx
+import requests
 
 from .config import PhylaxConfig, Policy
 from .exceptions import PhylaxViolation
@@ -180,9 +173,6 @@ class Phylax:
 
     def _patch_network(self) -> None:
         """Patch network libraries to monitor requests/responses."""
-        if not requests:
-            self._log.warning("requests library not available for network monitoring")
-            return
 
         # Patch requests
         def _patched_send(session: Any, req: Any, **kwargs: Any) -> Any:
@@ -207,7 +197,7 @@ class Phylax:
 
     def _unpatch_network(self) -> None:
         """Restore original network methods."""
-        if self._orig_requests_send and requests:
+        if self._orig_requests_send:
             requests.Session.send = self._orig_requests_send  # type: ignore[method-assign]
 
     def _patch_files(self) -> None:
@@ -513,8 +503,6 @@ class Phylax:
 
     def get_httpx_transport(self) -> Any:
         """Get HTTPX transport for manual integration."""
-        if not httpx:
-            raise ImportError("httpx is required for HTTPX transport integration")
 
         class _InterceptTransport(httpx.HTTPTransport):
             def __init__(self, phylax: Phylax, *args: Any, **kwargs: Any) -> None:

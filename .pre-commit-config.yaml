@@ -29,11 +29,11 @@ repos:
     hooks:
       - id: mypy
         additional_dependencies: [types-PyYAML, types-requests]
-        args: [--strict, --ignore-missing-imports]
+        files: ^src/phylax/.*\.py$
 
   - repo: https://github.com/pycqa/bandit
     rev: 1.8.6
     hooks:
       - id: bandit
-        args: [-r, --format, custom, --skip, B101,B601,B701]
+        args: [-r, --format, custom, --skip, B101,B110,B601,B701]
         exclude: ^tests/

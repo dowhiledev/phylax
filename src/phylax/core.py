@@ -3,14 +3,19 @@
 from __future__ import annotations
 
 import builtins
-from collections.abc import Callable
 import logging
-from pathlib import Path
 import sys
 import threading
 import time
-from typing import Any
+from typing import TYPE_CHECKING, Any, Literal
 import uuid
+
+from typing_extensions import Self
+
+if TYPE_CHECKING:
+    from collections.abc import Callable
+    from pathlib import Path
+    import types
 
 try:
     import httpx
@@ -20,7 +25,7 @@ except ImportError:
 try:
     import requests
 except ImportError:
-    requests = None
+    requests = None  # type: ignore[assignment]
 
 from .config import PhylaxConfig, Policy
 from .exceptions import PhylaxViolation
@@ -62,14 +67,14 @@ class Phylax:
 
         # State tracking
         self._active = False
-        self._patches_applied = []
+        self._patches_applied: list[str] = []
 
         # Original references for patching
-        self._orig_stdout = None
-        self._orig_stderr = None
-        self._orig_requests_send = None
-        self._orig_open = None
-        self._orig_tracer = None
+        self._orig_stdout: Any = None
+        self._orig_stderr: Any = None
+        self._orig_requests_send: Any = None
+        self._orig_open: Any = None
+        self._orig_tracer: Any = None
 
         # Tracer for function monitoring
         self._tracer = PhylaxTracer(self)
@@ -92,7 +97,7 @@ class Phylax:
     # Context Manager Protocol
     # ------------------------------------------------------------------
 
-    def __enter__(self):
+    def __enter__(self) -> Self:
         with self._lock:
             if self._active:
                 raise RuntimeError("Phylax context is already active")
@@ -102,7 +107,12 @@ class Phylax:
             self._log.debug("Phylax monitoring context activated")
             return self
 
-    def __exit__(self, exc_type, exc_val, exc_tb):
+    def __exit__(
+        self,
+        exc_type: type[BaseException] | None,
+        exc_val: BaseException | None,
+        exc_tb: types.TracebackType | None,
+    ) -> Literal[False]:
         with self._lock:
             if self._active:
                 self._remove_patches()
@@ -114,7 +124,7 @@ class Phylax:
     # Patching Methods
     # ------------------------------------------------------------------
 
-    def _apply_patches(self):
+    def _apply_patches(self) -> None:
         """Apply all configured patches."""
         if self.monitor_console:
             self._patch_console()
@@ -125,7 +135,7 @@ class Phylax:
         if self.monitor_function_calls:
             self._patch_function_calls()
 
-    def _remove_patches(self):
+    def _remove_patches(self) -> None:
         """Remove all applied patches."""
         if "console" in self._patches_applied:
             self._unpatch_console()
@@ -137,7 +147,7 @@ class Phylax:
             self._unpatch_function_calls()
         self._patches_applied.clear()
 
-    def _patch_console(self):
+    def _patch_console(self) -> None:
         """Patch stdout/stderr to monitor console output."""
         self._orig_stdout = sys.stdout
         self._orig_stderr = sys.stderr
@@ -147,21 +157,21 @@ class Phylax:
 
         self._patches_applied.append("console")
 
-    def _unpatch_console(self):
+    def _unpatch_console(self) -> None:
         """Restore original stdout/stderr."""
         if self._orig_stdout:
             sys.stdout = self._orig_stdout
         if self._orig_stderr:
             sys.stderr = self._orig_stderr
 
-    def _patch_network(self):
+    def _patch_network(self) -> None:
         """Patch network libraries to monitor requests/responses."""
         if not requests:
             self._log.warning("requests library not available for network monitoring")
             return
 
         # Patch requests
-        def _patched_send(session, req, **kwargs):
+        def _patched_send(session: Any, req: Any, **kwargs: Any) -> Any:
             # Monitor request
             if req.body:
                 self._scan_payload(req.body, scope="network", direction="request")
@@ -177,19 +187,19 @@ class Phylax:
 
         if not self._orig_requests_send:
             self._orig_requests_send = requests.Session.send
-            requests.Session.send = _patched_send
+            requests.Session.send = _patched_send  # type: ignore[method-assign,assignment]
 
         self._patches_applied.append("network")
 
-    def _unpatch_network(self):
+    def _unpatch_network(self) -> None:
         """Restore original network methods."""
         if self._orig_requests_send and requests:
-            requests.Session.send = self._orig_requests_send
+            requests.Session.send = self._orig_requests_send  # type: ignore[method-assign]
 
-    def _patch_files(self):
+    def _patch_files(self) -> None:
         """Patch file operations to monitor file I/O."""
 
-        def _patched_open(*args, **kwargs):
+        def _patched_open(*args: Any, **kwargs: Any) -> Any:
             file_obj = self._orig_open(*args, **kwargs)
 
             # Monitor file content if it's readable
@@ -209,18 +219,18 @@ class Phylax:
 
         self._patches_applied.append("files")
 
-    def _unpatch_files(self):
+    def _unpatch_files(self) -> None:
         """Restore original file operations."""
         if self._orig_open:
             builtins.open = self._orig_open
 
-    def _patch_function_calls(self):
+    def _patch_function_calls(self) -> None:
         """Patch sys.settrace to monitor function calls."""
         self._orig_tracer = sys.gettrace()
         sys.settrace(self._tracer.trace_calls)
         self._patches_applied.append("function_calls")
 
-    def _unpatch_function_calls(self):
+    def _unpatch_function_calls(self) -> None:
         """Restore original tracer."""
         sys.settrace(self._orig_tracer)
 
@@ -341,7 +351,7 @@ class Phylax:
     # Legacy Monitoring Methods
     # ------------------------------------------------------------------
 
-    def monitor_call(self, func: Callable, *args, **kwargs):
+    def monitor_call(self, func: Callable[..., Any], *args: Any, **kwargs: Any) -> Any:
         """Manually monitor a function call (legacy method, not needed with auto-monitoring)."""
         # Extract and monitor input
         input_data = self._input_extractor(args[0] if args else kwargs)
@@ -377,7 +387,7 @@ class Phylax:
         scope: str,
         direction: str,
         context: dict[str, Any] | None = None,
-    ):
+    ) -> None:
         """Scan payload for policy violations."""
         # For explicit analysis methods, always scan regardless of _active state
         # For automatic monitoring, only scan when _active is True
@@ -411,7 +421,9 @@ class Phylax:
                     policy, sample=txt_repr, context=violation_context
                 )
 
-    def _handle_violation(self, policy: Policy, sample: str, context: dict[str, Any]):
+    def _handle_violation(
+        self, policy: Policy, sample: str, context: dict[str, Any]
+    ) -> None:
         """Handle a policy violation."""
         self._log.warning(
             "%s violation of policy '%s' in scope '%s'",
@@ -427,7 +439,7 @@ class Phylax:
             except Exception as exc:
                 self._log.error("on_violation callback failed: %s", exc)
 
-        # Built‑in trigger implementations
+        # Built-in trigger implementations
         trigger = policy.trigger.lower()
         if trigger in {"raise", "raise_", "quarantine"}:
             raise PhylaxViolation(policy, sample, context)
@@ -438,11 +450,11 @@ class Phylax:
         elif trigger == "mitigate":
             pass  # Users can handle via on_violation hooks
         else:
-            self._log.debug("Unknown trigger '%s' – ignoring", trigger)
+            self._log.debug("Unknown trigger '%s' - ignoring", trigger)
 
     def _send_for_human_review(
-        self, policy: Policy, sample: str, context: dict[str, Any]
-    ):
+        self, policy: Policy, _sample: str, _context: dict[str, Any]
+    ) -> None:
         """Stub to integrate e.g. Slack, email, ticket system."""
         ticket_id = uuid.uuid4().hex[:8]
         self._log.warning(
@@ -453,17 +465,19 @@ class Phylax:
     # Event Hooks
     # ------------------------------------------------------------------
 
-    def on_input(self, fn: Callable[[Any], Any]):
+    def on_input(self, fn: Callable[[Any], Any]) -> Callable[[Any], Any]:
         """Register input callback."""
         self._on_input.append(fn)
         return fn
 
-    def on_output(self, fn: Callable[[Any], Any]):
+    def on_output(self, fn: Callable[[Any], Any]) -> Callable[[Any], Any]:
         """Register output callback."""
         self._on_output.append(fn)
         return fn
 
-    def on_violation(self, fn: Callable[[Policy, str, dict[str, Any]], None]):
+    def on_violation(
+        self, fn: Callable[[Policy, str, dict[str, Any]], None]
+    ) -> Callable[[Policy, str, dict[str, Any]], None]:
         """Register violation callback."""
         self._on_violation.append(fn)
         return fn
@@ -472,21 +486,21 @@ class Phylax:
     # Convenience Methods
     # ------------------------------------------------------------------
 
-    def scan_text(self, text: str, scope: str = "analysis"):
+    def scan_text(self, text: str, scope: str = "analysis") -> None:
         """Manually scan text for violations."""
         self._scan_payload(text, scope=scope, direction="manual")
 
-    def get_httpx_transport(self):
+    def get_httpx_transport(self) -> Any:
         """Get HTTPX transport for manual integration."""
         if not httpx:
             raise ImportError("httpx is required for HTTPX transport integration")
 
         class _InterceptTransport(httpx.HTTPTransport):
-            def __init__(self, phylax: Phylax, *args, **kwargs):
+            def __init__(self, phylax: Phylax, *args: Any, **kwargs: Any) -> None:
                 super().__init__(*args, **kwargs)
                 self.phylax = phylax
 
-            def handle_request(self, request):
+            def handle_request(self, request: Any) -> Any:
                 self.phylax._scan_payload(
                     request.content, scope="network", direction="request"
                 )

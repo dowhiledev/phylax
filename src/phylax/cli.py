@@ -3,8 +3,9 @@
 import argparse
 from pathlib import Path
 import sys
+from typing import Any
 
-from .config import PhylaxConfig
+from .config import PhylaxConfig, Policy
 from .core import Phylax
 from .version import __version__
 
@@ -72,10 +73,10 @@ def validate_config(config_file: Path) -> None:
             print(f"   - {policy.id} ({policy.type}, {policy.severity})")
 
     except Exception as e:
-        raise ValueError(f"Invalid configuration: {e}")
+        raise ValueError(f"Invalid configuration: {e}") from e
 
 
-def scan_text(text: str, config_file: Path = None) -> None:
+def scan_text(text: str, config_file: Path | None = None) -> None:
     """Scan text against policies."""
     if config_file:
         if not config_file.exists():
@@ -86,20 +87,24 @@ def scan_text(text: str, config_file: Path = None) -> None:
         config = PhylaxConfig(
             version=1,
             policies=[
-                {
-                    "id": "pii_ssn",
-                    "type": "regex",
-                    "pattern": r"\d{3}-\d{2}-\d{4}",
-                    "severity": "high",
-                    "trigger": "log",
-                },
-                {
-                    "id": "sensitive_keywords",
-                    "type": "regex",
-                    "pattern": r"(?i)(password|secret|token)",
-                    "severity": "medium",
-                    "trigger": "log",
-                },
+                Policy(
+                    id="pii_ssn",
+                    type="regex",
+                    pattern=r"\d{3}-\d{2}-\d{4}",
+                    severity="high",
+                    trigger="log",
+                    allowed=None,
+                    scope=None,
+                ),
+                Policy(
+                    id="sensitive_keywords",
+                    type="regex",
+                    pattern=r"(?i)(password|secret|token)",
+                    severity="medium",
+                    trigger="log",
+                    allowed=None,
+                    scope=None,
+                ),
             ],
         )
 
@@ -113,7 +118,9 @@ def scan_text(text: str, config_file: Path = None) -> None:
     violations_found = []
 
     @phylax.on_violation
-    def collect_violations(policy, sample, context):
+    def collect_violations(
+        policy: Policy, sample: str, context: dict[str, Any]
+    ) -> None:
         violations_found.append((policy, sample, context))
 
     # Analyze the text
@@ -121,7 +128,7 @@ def scan_text(text: str, config_file: Path = None) -> None:
 
     if violations_found:
         print(f"🚨 Found {len(violations_found)} policy violation(s):")
-        for policy, sample, context in violations_found:
+        for policy, sample, _context in violations_found:
             print(f"   - Policy: {policy.id} ({policy.severity})")
             print(f"     Sample: {sample[:80]}...")
     else:

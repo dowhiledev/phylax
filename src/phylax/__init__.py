@@ -23,7 +23,8 @@ Features:
 """
 
 from .config import PhylaxConfig, Policy
-from .core import Phylax, PhylaxViolation
+from .core import Phylax
+from .exceptions import PhylaxViolation
 from .version import __version__
 
 __all__ = [

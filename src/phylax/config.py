@@ -13,7 +13,7 @@ class Policy(BaseModel):
     """Represents a single security/compliance rule."""
 
     id: str = Field(..., description="Unique policy identifier")
-    type: str = Field(..., description="Policy engine type – e.g. regex, spdx, custom")
+    type: str = Field(..., description="Policy engine type - e.g. regex, spdx, custom")
     pattern: str | None = Field(
         None, description="Regex pattern or other matcher, depending on type"
     )
@@ -22,7 +22,7 @@ class Policy(BaseModel):
         "log", description="raise | log | human_review | quarantine | mitigate"
     )
     allowed: list[str] | None = Field(
-        None, description="Allow‑list for SPDX or other list‑based checks"
+        None, description="Allow-list for SPDX or other list-based checks"
     )
     scope: list[str] | None = Field(
         None,
@@ -30,10 +30,10 @@ class Policy(BaseModel):
     )
 
     # compiled regex is not a pydantic field (private attr)
-    _compiled: re.Pattern | None = None
+    _compiled: re.Pattern[str] | None = None
 
-    @model_validator(mode="after")
-    def _compile_regex(self):
+    @model_validator(mode="after")  # type: ignore[misc]
+    def _compile_regex(self) -> Policy:
         """Compile regex pattern after validation."""
         if self.type == "regex" and self.pattern:
             self._compiled = re.compile(self.pattern, re.MULTILINE | re.IGNORECASE)
@@ -42,8 +42,6 @@ class Policy(BaseModel):
     def matches(self, data: str | bytes) -> bool:
         """Return True if *data* violates this policy."""
         if self.type == "regex":
-            if not isinstance(data, (str, bytes)):
-                return False
             txt = data.decode() if isinstance(data, bytes) else data
             return bool(self._compiled and self._compiled.search(txt))
         if self.type == "spdx":
@@ -63,7 +61,7 @@ class Policy(BaseModel):
 
 
 class PhylaxConfig(BaseModel):
-    """Top‑level config object – version & list of policies."""
+    """Top-level config object - version & list of policies."""
 
     version: int = 1
     policies: list[Policy]
@@ -74,9 +72,10 @@ class PhylaxConfig(BaseModel):
         content = str(path)
 
         # Check if it's a file path (simple heuristic: single line, reasonable length, no newlines)
+        max_path_length = 500
         if (
-            isinstance(path, (str, Path))
-            and len(content) < 500
+            isinstance(path, str | Path)
+            and len(content) < max_path_length
             and "\n" not in content
             and content.strip()
         ):

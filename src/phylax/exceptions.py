@@ -2,9 +2,10 @@
 
 from __future__ import annotations
 
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
-from .config import Policy
+if TYPE_CHECKING:
+    from .config import Policy
 
 
 class PhylaxViolation(RuntimeError):
@@ -14,7 +15,7 @@ class PhylaxViolation(RuntimeError):
         self, policy: Policy, sample: str, context: dict[str, Any] | None = None
     ):
         msg = (
-            f"Policy '{policy.id}' ({policy.severity}) violated – trigger={policy.trigger}.\n"
+            f"Policy '{policy.id}' ({policy.severity}) violated - trigger={policy.trigger}.\n"
             f"Sample: {sample[:120]}..."
         )
         super().__init__(msg)

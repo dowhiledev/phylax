@@ -67,6 +67,7 @@ class Phylax:
 
         # State tracking
         self._active = False
+        self._ignore_depth = 0  # Track nested ignore contexts
         self._patches_applied: list[str] = []
 
         # Original references for patching
@@ -119,6 +120,19 @@ class Phylax:
                 self._active = False
                 self._log.debug("Phylax monitoring context deactivated")
             return False
+
+    def ignore(self) -> PhylaxIgnoreContext:
+        """Create a context manager that temporarily disables compliance checking.
+
+        Returns:
+            PhylaxIgnoreContext: Context manager for disabling monitoring
+
+        Example:
+            with phylax.ignore():
+                # No compliance checking happens here
+                internal_processing()
+        """
+        return PhylaxIgnoreContext(self)
 
     # ------------------------------------------------------------------
     # Patching Methods
@@ -389,6 +403,13 @@ class Phylax:
         context: dict[str, Any] | None = None,
     ) -> None:
         """Scan payload for policy violations."""
+        # Skip scanning if we're in an ignore context
+        if self._ignore_depth > 0:
+            self._log.debug(
+                f"Skipping scan due to ignore context (depth: {self._ignore_depth})"
+            )
+            return
+
         # For explicit analysis methods, always scan regardless of _active state
         # For automatic monitoring, only scan when _active is True
         method = context.get("method") if context else None
@@ -511,3 +532,31 @@ class Phylax:
                 return response
 
         return _InterceptTransport(self)
+
+
+class PhylaxIgnoreContext:
+    """Context manager that temporarily disables Phylax compliance checking."""
+
+    def __init__(self, phylax: Phylax) -> None:
+        self.phylax = phylax
+
+    def __enter__(self) -> Self:
+        with self.phylax._lock:
+            self.phylax._ignore_depth += 1
+            self.phylax._log.debug(
+                f"Phylax ignore context entered (depth: {self.phylax._ignore_depth})"
+            )
+        return self
+
+    def __exit__(
+        self,
+        exc_type: type[BaseException] | None,
+        exc_val: BaseException | None,
+        exc_tb: types.TracebackType | None,
+    ) -> Literal[False]:
+        with self.phylax._lock:
+            self.phylax._ignore_depth = max(0, self.phylax._ignore_depth - 1)
+            self.phylax._log.debug(
+                f"Phylax ignore context exited (depth: {self.phylax._ignore_depth})"
+            )
+        return False

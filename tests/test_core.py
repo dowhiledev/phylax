@@ -240,3 +240,86 @@ policies:
 
         # Should extract "password123" from the message field
         assert any("password123" in v for v in violations_found)
+
+    def test_ignore_context_manager(self) -> None:
+        """Test the ignore context manager functionality."""
+        config = PhylaxConfig(version=1, policies=self.test_policies)
+        phylax = Phylax(config)
+
+        violations_found = []
+
+        @phylax.on_violation
+        def capture_violations(policy, sample, context):
+            violations_found.append((policy.id, sample, context))
+
+        # Normal analysis should find violations
+        violations_found.clear()
+        phylax.analyze("This contains password text", context="normal test")
+        assert len(violations_found) == 1
+        assert violations_found[0][0] == "password_detector"
+
+        # Analysis within ignore context should find NO violations
+        violations_found.clear()
+        with phylax.ignore():
+            phylax.analyze("This contains password text", context="ignore test")
+        assert len(violations_found) == 0
+
+        # Analysis after ignore context should work normally again
+        violations_found.clear()
+        phylax.analyze("This contains password text", context="after ignore")
+        assert len(violations_found) == 1
+        assert violations_found[0][0] == "password_detector"
+
+    def test_ignore_context_nested(self) -> None:
+        """Test nested ignore contexts."""
+        config = PhylaxConfig(version=1, policies=self.test_policies)
+        phylax = Phylax(config)
+
+        violations_found = []
+
+        @phylax.on_violation
+        def capture_violations(policy, sample, context):
+            violations_found.append((policy.id, sample, context))
+
+        violations_found.clear()
+        with phylax.ignore():
+            phylax.analyze("This contains password", context="outer ignore")
+
+            with phylax.ignore():
+                phylax.analyze("This contains password", context="inner ignore")
+
+            phylax.analyze("This contains password", context="outer ignore again")
+
+        # No violations should be found in any nested ignore context
+        assert len(violations_found) == 0
+
+    def test_ignore_context_with_monitoring(self) -> None:
+        """Test ignore context within active monitoring."""
+        config = PhylaxConfig(version=1, policies=self.test_policies)
+        phylax = Phylax(config)
+
+        violations_found = []
+
+        @phylax.on_violation
+        def capture_violations(policy, sample, context):
+            violations_found.append((policy.id, sample, context))
+
+        violations_found.clear()
+
+        def process_data(data):
+            return f"processed: {data}"
+
+        with phylax:
+            # This should be monitored
+            process_data("safe data")
+
+            # This should NOT be monitored
+            with phylax.ignore():
+                process_data("data with password")
+
+            # This should be monitored again
+            process_data("more safe data")
+
+        # Should have no violations (console monitoring is disabled by default)
+        # But the ignore context should still work properly
+        assert len(violations_found) == 0

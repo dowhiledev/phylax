@@ -16,6 +16,7 @@
 - **Event Hooks**: Custom callbacks for input, output, and violation events
 - **Thread-Safe**: Safe for concurrent use
 - **Custom Extractors**: Define how to extract meaningful data from complex objects
+- **Selective Ignore**: Temporarily disable compliance checking with `phylax.ignore()` context manager
 
 ## Quick Start
 
@@ -202,6 +203,40 @@ with phylax:
 
     # Function calls are monitored
     result = my_ai_function(content)
+```
+
+### Ignoring Compliance Checks
+
+Sometimes you may want to temporarily disable compliance checking for specific contexts where you know the data is safe or for internal operations:
+
+```python
+phylax = Phylax(config)
+
+with phylax:
+    # This will be monitored
+    response = ai_agent("Process this user input")
+
+    # Temporarily disable monitoring for internal operations
+    with phylax.ignore():
+        # No compliance checking happens here
+        internal_debug_data = extract_debug_info(response)
+        log_internal_metrics(internal_debug_data)
+        cleanup_temp_files()
+
+    # Monitoring resumes here
+    final_response = post_process(response)
+
+# Or use ignore with explicit analysis
+user_input = "Tell me about security"
+safe_input = phylax.analyze_input(user_input)
+
+with phylax.ignore():
+    # Internal processing without compliance checks
+    internal_context = build_internal_context(safe_input)
+    debug_tokens = tokenize_for_debugging(internal_context)
+
+# Back to normal monitoring
+final_output = phylax.analyze_output(generate_response(safe_input))
 ```
 
 ### Integration with AI Frameworks

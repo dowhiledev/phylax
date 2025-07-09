@@ -1,6 +1,6 @@
 # Phylax
 
-[![Python 3.8.1+](https://img.shields.io/badge/python-3.8.1+-blue.svg)](https://www.python.org/downloads/)
+[![Python 3.10+](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/downloads/)
 [![PyPI version](https://badge.fury.io/py/phylax.svg)](https://badge.fury.io/py/phylax)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
@@ -8,14 +8,14 @@
 
 ## Features
 
-- **🔒 Context Manager Approach**: Automatically monitor all activity within a `with Phylax(...):` block
-- **🎯 Explicit Analysis**: Use `phylax.analyze()` for targeted compliance checks on specific data
-- **⚙️ Flexible Configuration**: YAML-based policy configuration supporting regex, SPDX, and custom policies
-- **🚨 Multiple Trigger Types**: Choose from raise, log, human_review, or custom violation handling
-- **🔍 Comprehensive Monitoring**: Console output, function calls, network requests, and file operations
-- **🎣 Event Hooks**: Custom callbacks for input, output, and violation events
-- **🔧 Thread-Safe**: Safe for concurrent use
-- **🎭 Custom Extractors**: Define how to extract meaningful data from complex objects
+- **Context Manager Approach**: Automatically monitor all activity within a `with Phylax(...):` block
+- **Explicit Analysis**: Use `phylax.analyze()` for targeted compliance checks on specific data
+- **Flexible Configuration**: YAML-based policy configuration supporting regex, SPDX, and custom policies
+- **Multiple Trigger Types**: Choose from raise, log, human_review, or custom violation handling
+- **Comprehensive Monitoring**: Console output, function calls, network requests, and file operations
+- **Event Hooks**: Custom callbacks for input, output, and violation events
+- **Thread-Safe**: Safe for concurrent use
+- **Custom Extractors**: Define how to extract meaningful data from complex objects
 
 ## Quick Start
 
@@ -339,7 +339,7 @@ phylax --version
 
 ```bash
 # Clone the repository
-git clone https://github.com/your-username/phylax.git
+git clone https://github.com/dowhiledev/phylax.git
 cd phylax
 
 # Install with development dependencies using uv
@@ -365,14 +365,9 @@ uv run pytest tests/test_core.py
 ### Code Quality
 
 ```bash
-# Format code
-uv run black .
-
-# Sort imports
-uv run isort .
-
-# Lint code
-uv run flake8
+# Format and lint code
+uv run ruff format .
+uv run ruff check . --fix
 
 # Type checking
 uv run mypy src/phylax
@@ -401,8 +396,8 @@ If you discover a security vulnerability, please send an e-mail to security@phyl
 ## Support
 
 - **Documentation**: [https://phylax.readthedocs.io](https://phylax.readthedocs.io)
-- **Issues**: [GitHub Issues](https://github.com/your-username/phylax/issues)
-- **Discussions**: [GitHub Discussions](https://github.com/your-username/phylax/discussions)
+- **Issues**: [GitHub Issues](https://github.com/dowhiledev/phylax/issues)
+- **Discussions**: [GitHub Discussions](https://github.com/dowhiledev/phylax/discussions)
 
 ## Changelog
 

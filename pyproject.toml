@@ -38,24 +38,17 @@ dev = [
     "mypy>=1.0.0",
     "pre-commit>=3.0.0",
 ]
-docs = [
-    "sphinx>=5.0.0",
-    "sphinx-rtd-theme>=1.0.0",
-    "myst-parser>=1.0.0",
-]
 test = [
     "pytest>=7.0.0",
     "pytest-cov>=4.0.0",
     "pytest-asyncio>=0.21.0",
-    "httpx>=0.25.0",
-    "requests>=2.28.0",
 ]
 
 [project.urls]
-"Homepage" = "https://github.com/chandralegend/phylax"
-"Repository" = "https://github.com/chandralegend/phylax"
-"Bug Tracker" = "https://github.com/chandralegend/phylax/issues"
-"Documentation" = "https://phylax.readthedocs.io"
+"Homepage" = "https://phylax.dowhile.dev"
+"Repository" = "https://github.com/dowhiledev/phylax"
+"Bug Tracker" = "https://github.com/dowhiledev/phylax/issues"
+"Documentation" = "https://phylax.dowhile.dev"
 
 [project.scripts]
 phylax = "phylax.cli:main"

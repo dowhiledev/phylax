@@ -1,0 +1,76 @@
+version: 1
+policies:
+  # PII Detection Policies
+  - id: pii_ssn
+    type: regex
+    pattern: "\\d{3}-\\d{2}-\\d{4}"
+    severity: high
+    trigger: raise
+    scope: [output, analysis, network]
+
+  - id: pii_credit_card
+    type: regex
+    pattern: "\\d{4}[-\\s]?\\d{4}[-\\s]?\\d{4}[-\\s]?\\d{4}"
+    severity: high
+    trigger: raise
+    scope: [output, analysis]
+
+  - id: pii_email
+    type: regex
+    pattern: "\\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Z|a-z]{2,}\\b"
+    severity: medium
+    trigger: log
+    scope: [output, analysis]
+
+  - id: pii_phone
+    type: regex
+    pattern: "\\(?\\d{3}\\)?[-\\s]?\\d{3}[-\\s]?\\d{4}"
+    severity: medium
+    trigger: log
+    scope: [output, analysis]
+
+  # Security Keywords
+  - id: sensitive_keywords
+    type: regex
+    pattern: "(?i)(password|secret|token|api_key|private_key|auth_token)"
+    severity: medium
+    trigger: log
+    scope: [input, output, analysis, console]
+
+  - id: high_risk_keywords
+    type: regex
+    pattern: "(?i)(database_password|admin_password|root_password|master_key)"
+    severity: high
+    trigger: raise
+    scope: [input, output, analysis, console]
+
+  # License Compliance
+  - id: license_compliance
+    type: spdx
+    allowed: [MIT, Apache-2.0, BSD-2-Clause, BSD-3-Clause, ISC]
+    severity: medium
+    trigger: log
+    scope: [file, analysis]
+
+  # Network Security
+  - id: suspicious_urls
+    type: regex
+    pattern: "https?://(?:.*\\.)?(?:malware|phishing|suspicious)\\..*"
+    severity: high
+    trigger: raise
+    scope: [network, analysis]
+
+  # Data Leakage Prevention
+  - id: internal_paths
+    type: regex
+    pattern: "(?i)(/etc/passwd|/etc/shadow|C:\\\\Windows\\\\System32|/var/log/)"
+    severity: high
+    trigger: raise
+    scope: [output, analysis, console]
+
+  - id: sql_injection_patterns
+    type: regex
+    pattern: "(?i)(union\\s+select|drop\\s+table|delete\\s+from|insert\\s+into)"
+    severity: high
+    trigger: raise
+    scope: [input, analysis]

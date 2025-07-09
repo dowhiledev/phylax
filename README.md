@@ -8,16 +8,18 @@
 
 ## Features
 
-- **Context Manager Approach**: Automatically monitor all activity within a `with Phylax(...):` block
-- **Explicit Analysis**: Use `phylax.analyze()` for targeted compliance checks on specific data
-- **Built-in Presets**: Ready-made compliance presets for HIPAA, SOC 2, PCI DSS, GDPR, and Financial Services
-- **Flexible Configuration**: YAML-based policy configuration supporting regex, SPDX, and custom policies
-- **Multiple Trigger Types**: Choose from raise, log, human_review, or custom violation handling
-- **Comprehensive Monitoring**: Console output, function calls, network requests, and file operations
-- **Event Hooks**: Custom callbacks for input, output, and violation events
-- **Thread-Safe**: Safe for concurrent use
-- **Custom Extractors**: Define how to extract meaningful data from complex objects
-- **Selective Ignore**: Temporarily disable compliance checking with `phylax.ignore()` context manager
+| Feature | Description |
+|---------|-------------|
+| **Plug and Play Design** | Automatically monitor all activity within a `with Phylax(...):` block |
+| **Explicit Analysis** | Use `phylax.analyze()` for targeted compliance checks on specific data |
+| **Built-in Presets** | Ready-made compliance presets for HIPAA, SOC 2, PCI DSS, GDPR, and Financial Services |
+| **Flexible Configuration** | YAML-based policy configuration supporting regex, SPDX, and custom policies |
+| **Multiple Trigger Types** | Choose from raise, log, human_review, or custom violation handling |
+| **Comprehensive Monitoring** | Console output, function calls, network requests, and file operations |
+| **Event Hooks** | Custom callbacks for input, output, and violation events |
+| **Thread-Safe** | Safe for concurrent use |
+| **Custom Extractors** | Define how to extract meaningful data from complex objects |
+| **Selective Ignore** | Temporarily disable compliance checking with `phylax.ignore()` context manager |
 
 ## Quick Start
 

@@ -13,6 +13,7 @@ def test_list_presets():
     assert "pci_dss" in presets
     assert "gdpr" in presets
     assert "financial" in presets
+    assert "enterprise" in presets
 
 
 def test_get_preset():
@@ -20,6 +21,9 @@ def test_get_preset():
     hipaa_policies = get_preset("hipaa")
     assert len(hipaa_policies) == 6
     assert all(isinstance(p, Policy) for p in hipaa_policies)
+
+    enterprise_policies = get_preset("enterprise")
+    assert len(enterprise_policies) == 6
     
     # Test invalid preset
     with pytest.raises(ValueError, match="Unknown preset"):
@@ -46,6 +50,9 @@ def test_config_from_preset():
     config = PhylaxConfig.from_preset("hipaa")
     assert len(config.policies) == 6
     assert config.version == 1
+
+    enterprise_config = PhylaxConfig.from_preset("enterprise")
+    assert len(enterprise_config.policies) == 6
 
 
 def test_config_from_multiple_presets():

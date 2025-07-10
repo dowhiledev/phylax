@@ -264,12 +264,65 @@ FINANCIAL_POLICIES = [
     ),
 ]
 
+# Enterprise Security Preset
+ENTERPRISE_POLICIES = [
+    Policy(
+        id="enterprise_private_ip",
+        type="regex",
+        pattern=r"\b(?:10\.\d{1,3}\.\d{1,3}\.\d{1,3}|172\.(?:1[6-9]|2[0-9]|3[01])\.\d{1,3}\.\d{1,3}|192\.168\.\d{1,3}\.\d{1,3})\b",
+        severity="high",
+        trigger="log",
+        scope=["output", "analysis", "network", "console"],
+    ),
+    Policy(
+        id="enterprise_internal_url",
+        type="regex",
+        pattern=r"\b(?:https?://)?(?:intranet|internal|corp|private)\.[A-Za-z0-9.-]+\b",
+        severity="high",
+        trigger="log",
+        scope=["output", "analysis", "network"],
+    ),
+    Policy(
+        id="enterprise_env_var",
+        type="regex",
+        pattern=r"(?i)[A-Z0-9_]*(?:SECRET|PASSWORD|TOKEN|KEY)=[^\s]+",
+        severity="critical",
+        trigger="raise",
+        scope=["output", "analysis", "network", "console"],
+    ),
+    Policy(
+        id="enterprise_ssh_key",
+        type="regex",
+        pattern=r"-----BEGIN (?:RSA |DSA |EC )?PRIVATE KEY-----",
+        severity="critical",
+        trigger="raise",
+        scope=["output", "analysis", "network", "console"],
+    ),
+    Policy(
+        id="enterprise_slack_token",
+        type="regex",
+        pattern=r"xox(?:b|p|r|o|a)-[A-Za-z0-9-]{10,48}",
+        severity="critical",
+        trigger="raise",
+        scope=["output", "analysis", "network", "console"],
+    ),
+    Policy(
+        id="enterprise_google_oauth",
+        type="regex",
+        pattern=r"ya29\.[A-Za-z0-9_-]{60,}",
+        severity="critical",
+        trigger="raise",
+        scope=["output", "analysis", "network", "console"],
+    ),
+]
+
 # Register all presets
 PresetRegistry.register_preset("hipaa", HIPAA_POLICIES)
 PresetRegistry.register_preset("soc2", SOC2_POLICIES)
 PresetRegistry.register_preset("pci_dss", PCI_DSS_POLICIES)
 PresetRegistry.register_preset("gdpr", GDPR_POLICIES)
 PresetRegistry.register_preset("financial", FINANCIAL_POLICIES)
+PresetRegistry.register_preset("enterprise", ENTERPRISE_POLICIES)
 
 # Convenience function for getting presets
 def get_preset(name: str) -> list[Policy]:

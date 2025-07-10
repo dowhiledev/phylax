@@ -12,7 +12,7 @@
 |---------|-------------|
 | **Plug and Play Design** | Automatically monitor all activity within a `with Phylax(...):` block |
 | **Explicit Analysis** | Use `phylax.analyze()` for targeted compliance checks on specific data |
-| **Built-in Presets** | Ready-made compliance presets for HIPAA, SOC 2, PCI DSS, GDPR, and Financial Services |
+| **Built-in Presets** | Ready-made compliance presets for HIPAA, SOC 2, PCI DSS, GDPR, Financial Services, and Enterprise Security |
 | **Flexible Configuration** | YAML-based policy configuration supporting regex, SPDX, and custom policies |
 | **Multiple Trigger Types** | Choose from raise, log, human_review, or custom violation handling |
 | **Comprehensive Monitoring** | Console output, function calls, network requests, and file operations |
@@ -90,7 +90,7 @@ Phylax provides built-in presets for common compliance standards:
 from phylax import PhylaxConfig, list_presets
 
 # See available presets
-print(list_presets())  # ['hipaa', 'soc2', 'pci_dss', 'gdpr', 'financial']
+print(list_presets())  # ['hipaa', 'soc2', 'pci_dss', 'gdpr', 'financial', 'enterprise']
 
 # Use a single preset
 config = PhylaxConfig.from_preset("hipaa")

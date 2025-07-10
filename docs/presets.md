@@ -40,6 +40,14 @@ Phylax provides built-in presets for common security and compliance standards. T
 - `fin_swift_code`: Detects SWIFT codes
 - `fin_iban`: Detects IBAN numbers
 
+### Enterprise Security
+- `enterprise_private_ip`: Detects private IP addresses
+- `enterprise_internal_url`: Detects internal URLs
+- `enterprise_env_var`: Detects secrets in environment variables
+- `enterprise_ssh_key`: Detects private SSH key blocks
+- `enterprise_slack_token`: Detects Slack tokens
+- `enterprise_google_oauth`: Detects Google OAuth tokens
+
 ## Usage
 
 ### Basic Usage
@@ -48,7 +56,7 @@ Phylax provides built-in presets for common security and compliance standards. T
 from phylax import PhylaxConfig, Phylax, list_presets, get_preset
 
 # List available presets
-print(list_presets())  # ['hipaa', 'soc2', 'pci_dss', 'gdpr', 'financial']
+print(list_presets())  # ['hipaa', 'soc2', 'pci_dss', 'gdpr', 'financial', 'enterprise']
 
 # Get policies for a specific preset
 hipaa_policies = get_preset("hipaa")
